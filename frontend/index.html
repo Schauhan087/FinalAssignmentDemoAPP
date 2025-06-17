@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Multi-Tier App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Kubernetes Multi-Tier Application</h1>
+            <p>Frontend (Nginx) → Backend (Flask) → Database (MySQL)</p>
+        </div>
+        
+        <div class="status success">
+            <strong>✅ Frontend Status:</strong> Nginx server running successfully!
+        </div>
+        
+        <div id="backend-status" class="status">
+            <strong>🔄 Backend Status:</strong> Testing connection...
+        </div>
+        
+        <div id="database-status" class="status">
+            <strong>🔄 Database Status:</strong> Testing connection...
+        </div>
+        
+        <button onclick="testBackend()">Test Backend Health</button>
+        <button onclick="testDatabase()">Test Database Connection</button>
+        <button onclick="fetchData()">Fetch Sample Data</button>
+        
+        <div id="results" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        async function testBackend() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                const statusDiv = document.getElementById('backend-status');
+                
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '<strong>✅ Backend Status:</strong> Connected successfully!';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '<strong>❌ Backend Status:</strong> Connection failed!';
+                }
+                
+                document.getElementById('results').innerHTML = 
+                    '<h3>Backend Response:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    
+            } catch (error) {
+                const statusDiv = document.getElementById('backend-status');
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '<strong>❌ Backend Status:</strong> Cannot reach backend service';
+                
+                document.getElementById('results').innerHTML = 
+                    '<h3>Error:</h3><pre>' + error.message + '</pre>';
+            }
+        }
+        
+        async function testDatabase() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                const statusDiv = document.getElementById('database-status');
+                
+                if (response.ok && data.database === 'connected') {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '<strong>✅ Database Status:</strong> MySQL connected successfully!';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '<strong>❌ Database Status:</strong> MySQL connection failed!';
+                }
+                
+            } catch (error) {
+                const statusDiv = document.getElementById('database-status');
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '<strong>❌ Database Status:</strong> Cannot test database connection';
+            }
+        }
+        
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                
+                document.getElementById('results').innerHTML = 
+                    '<h3>Database Data:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    '<h3>Error fetching data:</h3><pre>' + error.message + '</pre>';
+            }
+        }
+        
+        // Auto-test on page load
+        window.onload = function() {
+            setTimeout(testBackend, 1000);
+            setTimeout(testDatabase, 2000);
+        };
+    </script>
+</body>
+</html>
